@@ -1,14 +1,13 @@
 import math
 import random
-import time
 import networkx as nx
 import matplotlib.pyplot as plt
 
 class HCP:
-    def __init__(self, path):
+    def __init__(self,path):
         self.graph = self.build_graph(path)
 
-    def build_graph(self, path):
+    def build_graph(self,path):
         Graph = {}
 
         with open(path) as f:
@@ -19,7 +18,7 @@ class HCP:
 
         return Graph
 
-    def nearest_neighbor(self, G):
+    def nearest_neighbor(self,G):
         graph = G.copy()
         total_dist = 0
         route = []
@@ -58,33 +57,29 @@ class HCP:
 
         return route, total_dist
 
-    def cheapest_insertion(self, G):
-        """{1:(x,y) , 2:(x,y)}"""
+
+    def cheapest_insertion(self,G):
+        '''{1:(x,y) , 2:(x,y)}'''
         graph = G.copy()
         V = []
         for value in graph.values():
-            V.append([value[0], value[1]])
+            V.append([value[0],value[1]])
 
         v0 = V[0]
         H = [v0, v0]
-        W = V[1 : len(V)]
+        W = V[1:len(V)]
         route = []
 
         while len(H) < len(V):
             cost = 0
-            for w in W:
+            for w in W: 
                 distance = []
-                for i in range(len(H) - 1):
+                for i in range(len(H)-1):
                     # distance of the left node
-                    d1 = math.sqrt(pow((w[0] - H[i][0]), 2) + pow((w[1] - H[i][1]), 2))
+                    d1 = math.sqrt(pow((w[0]-H[i][0]),2) + pow((w[1]-H[i][1]),2))
                     # distance of the right node
-                    d2 = math.sqrt(
-                        pow((w[0] - H[i + 1][0]), 2) + pow((w[1] - H[i + 1][1]), 2)
-                    )
-                    d3 = math.sqrt(
-                        pow((H[i + 1][0] - H[i][0]), 2)
-                        + pow((H[i][1] - H[i + 1][1]), 2)
-                    )
+                    d2 = math.sqrt(pow((w[0]-H[i+1][0]),2) + pow((w[1]-H[i+1][1]),2))
+                    d3 = math.sqrt(pow((H[i+1][0]-H[i][0]),2) + pow((H[i][1]-H[i+1][1]),2))
                     # total distance
                     d = d1 + d2 - d3
                     distance.append(d)
@@ -93,13 +88,14 @@ class HCP:
                 min_distance_index = distance.index(min(distance))
                 cost += min(distance)
                 # add node w in H
-                H.insert(min_distance_index + 1, w)
-
+                H.insert(min_distance_index+1, w)
+                
         for h in range(len(H)):
-            route.append(V.index(H[h]) + 1)
+            route.append(V.index(H[h])+1)
             # H[h] = H.index(h)
 
-        return route, cost
+
+        return route, cost 
 
     # Aufgabe 1 (c)
     def cheapest_insertion_2OPT(self,G):
@@ -164,14 +160,9 @@ class HCP:
 
         return route, cost 
 
-    def cal_time(self, f,*args,**kwargs):
-        start = time.perf_counter()
-        f(*args,*kwargs)
-        end = time.perf_counter()
-        return end - start
 
-    def draw_graph(self, route):
-        """visualise the graph"""
+    def draw_graph(self,route):
+        '''visualise the graph'''
         G = nx.DiGraph()
         pos = {}
         options = {
@@ -193,7 +184,7 @@ class HCP:
             pos[key] = (self.graph[key][0], self.graph[key][1])
 
         G.add_edge(int(route[-2]), int(route[-1]))  # get back to start
-
+        
         nx.draw_networkx(G, pos, **options)
         ax = plt.gca()
         ax.margins(0.20)
@@ -202,9 +193,15 @@ class HCP:
         return
 
 
+chp_1 = HCP("./Daten/eins.txt") # read the data from eins.txt and create graph
+graph_1 = chp_1.graph
 
-
-
+route, dist = chp_1.nearest_neighbor(graph_1)
+chp_1.draw_graph(route) # visulise the graph
+route, dist = chp_1.cheapest_insertion(graph_1)
+# chp_1.draw_graph(route)
+# print(route,dist)
+chp_1.cheapest_insertion_2OPT(graph_1)
 
 
 
