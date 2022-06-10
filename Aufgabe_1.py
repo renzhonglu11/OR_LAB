@@ -3,15 +3,19 @@ import random
 import time
 import networkx as nx
 import matplotlib.pyplot as plt
-from sqlalchemy import false, true
+
 
 class HCP:
     def __init__(self, path):
+        """
+        read the data according to the given path
+        graph is represented as a dictionary
+        e.g {1:(x_1,y_1),2:(x_2,y_2),...} 
+        """
         self.graph = self.build_graph(path)
 
     def build_graph(self, path):
         Graph = {}
-
         with open(path) as f:
             for line in f:
                 tmp_str = line.split(" ")
@@ -38,7 +42,6 @@ class HCP:
                 x = value[0]
                 y = value[1]
                 cur_dist = math.sqrt(math.pow(v_x - x, 2) + math.pow(v_y - y, 2))
-                # print(cur_dist)
                 if cur_dist < min_dist:
                     min_dist = cur_dist
                     start = key
@@ -54,13 +57,11 @@ class HCP:
             math.pow(last_two[0] - last_one[0], 2)
             + math.pow(last_two[1] - last_one[1], 2)
         )
-        # print(route)
-        # print(total_dist)
 
         return route, total_dist
 
     def cheapest_insertion(self, G):
-        """{1:(x,y) , 2:(x,y)}"""
+       
         graph = G.copy()
         V = []
         for value in graph.values():
@@ -99,31 +100,30 @@ class HCP:
         for h in range(len(H)):
             route.append(V.index(H[h]) + 1)
             # H[h] = H.index(h)
-
         return route, cost
 
     # Aufgabe 1 (c)
-    def cheapest_insertion_2OPT(self, G, route):
-        '''{1:(x,y) , 2:(x,y)}'''
-        
-        ################################
+    def OPT2(self, route, max_iteration):        
         best = route
-        improved = True
-        while improved:
-            improved = False
+        counter = 0
+
+        while counter < max_iteration:
+            counter+=1
             for i in range(1, len(route)-2):
                 for j in range(i+1, len(route)):
                     if j - i == 1: continue # changes nothing e.g 3-4 to 4-3
                     new_route = route[:]
                     new_route[i:j] = route[j-1:i-1:-1]
-                    print(new_route)
+                    # print(new_route)
                     if self.cost(new_route) < self.cost(best):
                         best = new_route
-                        improved = True
-            route = best
-        return best
+
+        return best, self.cost(best)
 
     def cost(self, route):
+        '''
+        caculate the total cost of the given route
+        '''
         G = self.graph.copy()
         cost = 0
         for i in range(1,len(route)-1):
@@ -132,6 +132,9 @@ class HCP:
         return cost
 
     def cal_time(self, f,*args,**kwargs):
+        '''
+        calculate the run time
+        '''
         start = time.perf_counter()
         f(*args,*kwargs)
         end = time.perf_counter()

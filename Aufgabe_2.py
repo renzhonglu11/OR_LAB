@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 
 class MST:
 
-
-
     def find_mst(self, graph):
         g = graph.copy()
         v = 1
