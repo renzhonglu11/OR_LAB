@@ -3,6 +3,7 @@ import random
 import time
 import networkx as nx
 import matplotlib.pyplot as plt
+from sqlalchemy import false, true
 
 class HCP:
     def __init__(self, path):
@@ -102,67 +103,33 @@ class HCP:
         return route, cost
 
     # Aufgabe 1 (c)
-    def cheapest_insertion_2OPT(self,G):
+    def cheapest_insertion_2OPT(self, G, route):
         '''{1:(x,y) , 2:(x,y)}'''
-        graph = G.copy()
-        V = []
-        E = []
-        for value in graph.values():
-            V.append([value[0],value[1]])
-
-        v0 = V[0]
-        H = [v0, v0]
-        W = V[1:len(V)]
-        route = []
-
-        while len(H) < len(V):
-            cost = 0
-            for w in W: 
-                distance = []
-                for i in range(len(H)-1):
-                    # distance of the left node
-                    d1 = math.sqrt(pow((w[0]-H[i][0]),2) + pow((w[1]-H[i][1]),2))
-                    # distance of the right node
-                    d2 = math.sqrt(pow((w[0]-H[i+1][0]),2) + pow((w[1]-H[i+1][1]),2))
-                    d3 = math.sqrt(pow((H[i+1][0]-H[i][0]),2) + pow((H[i][1]-H[i+1][1]),2))
-                    # total distance
-                    d = d1 + d2 - d3
-                    distance.append(d)
-
-                # find the minimal distance
-                min_distance_index = distance.index(min(distance))
-                cost += min(distance)
-                E.append(min(distance))
-                # add node w in H
-                H.insert(min_distance_index+1, w)
-                
-        for h in range(len(H)):
-            route.append(V.index(H[h])+1)
-            # H[h] = H.index(h)
-
+        
         ################################
-        print(H)
-        print(H[0])
-        print(H[1])
-        i = 0
-        i_max = 1000
-        val = self.cost
-        while i < i_max:
-            i += 1
-            for i in range(len(H)-1):
-                j = i + 2
-                for j in range(len(H)-1):
-                    d1 = math.sqrt(pow((H[i][0]-H[j][0]),2) + pow((H[i][1]-H[j][1]),2))
-                    d2 = math.sqrt(pow((H[i+1][0]-H[j+1][0]),2) + pow((H[i+1][1]-H[j+1][1]),2))
-                    # calculate the new cost of the Kanten 
-                    d = d1 + d2
-                    d3 = E[i] + E[j]
-                    if(d < d3):
-                        cost = cost - d3 + d
-                    else:
-                        continue
+        best = route
+        improved = True
+        while improved:
+            improved = False
+            for i in range(1, len(route)-2):
+                for j in range(i+1, len(route)):
+                    if j - i == 1: continue # changes nothing e.g 3-4 to 4-3
+                    new_route = route[:]
+                    new_route[i:j] = route[j-1:i-1:-1]
+                    print(new_route)
+                    if self.cost(new_route) < self.cost(best):
+                        best = new_route
+                        improved = True
+            route = best
+        return best
 
-        return route, cost 
+    def cost(self, route):
+        G = self.graph.copy()
+        cost = 0
+        for i in range(1,len(route)-1):
+            d = math.sqrt(pow((G[i][0]-G[i+1][0]),2) + pow((G[i][1]-G[i+1][1]),2))
+            cost += d
+        return cost
 
     def cal_time(self, f,*args,**kwargs):
         start = time.perf_counter()
